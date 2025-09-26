@@ -22,24 +22,24 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-lg border-b border-border overflow-hidden">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4 w-full">
-              <div className="w-full h-16 relative">
+        <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between">
+            <div className="flex items-center w-full relative mb-2 sm:mb-0">
+              <div className="w-full h-12 sm:h-16 relative">
                 <img 
                   src="/moto-animation.svg" 
                   alt="Moto Event" 
                   className="absolute top-0 w-full h-full"
                 />
               </div>
-              <div className="absolute left-1/2 transform -translate-x-1/2">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
+                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   Validación de Invitados
                 </h1>
-                <p className="text-sm text-muted-foreground">Sistema de gestión para eventos de motos</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Sistema de gestión para eventos de motos</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 mt-1 sm:mt-0">
               <Badge variant="outline" className="text-xs">
                 <Database className="h-3 w-3 mr-1" />
                 Listo para BD

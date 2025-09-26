@@ -209,12 +209,12 @@ export const GuestTable: React.FC<GuestTableProps> = ({
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <Table className="w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[100px]">Acción</TableHead>
-                  <TableHead className="w-[80px]">Estado</TableHead>
+                  <TableHead className="w-[80px] sticky left-0 bg-background z-20">Acción</TableHead>
+                  <TableHead className="w-[70px] sticky left-[80px] bg-background z-20">Estado</TableHead>
                   {(supabaseGuests.length > 0 ? Object.keys(supabaseGuests[0]?.guest_data || {}) : headers).map((header) => (
                     <TableHead key={header} className="min-w-[120px]">
                       {header}
@@ -232,21 +232,22 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                       key={index}
                       className={isConfirmed ? "bg-success/10" : ""}
                     >
-                      <TableCell>
+                      <TableCell className="sticky left-0 bg-background z-10">
                         <Button
                           onClick={() => handleConfirmGuest(guestId)}
                           variant={isConfirmed ? "default" : "outline"}
                           size="sm"
-                          className={isConfirmed ? "bg-success hover:bg-success/90" : ""}
+                          className={`${isConfirmed ? "bg-success hover:bg-success/90" : ""} px-2 py-1 h-auto text-xs sm:text-sm`}
                         >
-                          <CheckCircle2 className="h-4 w-4 mr-1" />
-                          {isConfirmed ? 'Confirmado' : 'Confirmar'}
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          <span className="hidden sm:inline">{isConfirmed ? 'Confirmado' : 'Confirmar'}</span>
+                          <span className="inline sm:hidden">{isConfirmed ? 'OK' : 'OK?'}</span>
                         </Button>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="sticky left-[80px] bg-background z-10">
                         <Badge 
                           variant={isConfirmed ? "default" : "secondary"}
-                          className={isConfirmed ? "bg-success/20 text-success border-success/30" : ""}
+                          className={`${isConfirmed ? "bg-success/20 text-success border-success/30" : ""} text-xs px-1 py-0`}
                         >
                           {isConfirmed ? (
                             <>
