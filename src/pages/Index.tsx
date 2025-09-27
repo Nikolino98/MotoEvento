@@ -46,11 +46,11 @@ const Index = () => {
               {/* Moto Animation Group */}
               <div className="flex items-center justify-center h-full">
                 <img
-  src="/moto-animation.svg"
-  alt={`Moto ${motoColors[motoIndex].name}`}
-  className="w-full h-full scale-150 object-contain animate-moto-slide"
-  style={{ filter: motoColors[motoIndex].filter }}
-/>
+                  src="/moto-animation.svg"
+                  alt={`Moto ${motoColors[motoIndex].name}`}
+                  className="w-full h-full scale-150 object-contain animate-moto-slide"
+                  style={{ filter: motoColors[motoIndex].filter }}
+                />
               </div>
               <div className="w-full text-center sm:ml-4">
                 <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
@@ -142,7 +142,14 @@ const Index = () => {
         )}
 
         {/* CSV Upload Section */}
-        <CSVUploader onDataLoad={handleDataLoad} />
+        <details className="mb-4" style={{ userSelect: "none" }}>
+          <summary className="cursor-pointer font-semibold text-primary py-2 px-2 rounded hover:bg-accent/20 transition">
+            Cargar archivo CSV o Excel
+          </summary>
+          <div className="pt-2">
+            <CSVUploader onDataLoad={handleDataLoad} />
+          </div>
+        </details>
 
         {/* Guest Table Section */}
         <GuestTable
