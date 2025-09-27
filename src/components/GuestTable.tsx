@@ -273,13 +273,15 @@ export const GuestTable: React.FC<GuestTableProps> = ({
           <TableHeader>
             <TableRow>
               {/* Orden solo en desktop */}
-              <TableHead className="w-[40px] text-center hidden sm:table-cell">
+              <TableHead className="min-w-[50px] text-center hidden sm:table-cell">
                 N°
               </TableHead>
-              <TableHead className="w-[120px] text-center">Acciones</TableHead>
-              <TableHead className="w-[120px] text-center">Estado</TableHead>
+              <TableHead className="min-w-[120px] text-left">
+                Acciones
+              </TableHead>
+              <TableHead className="min-w-[120px] text-left">Estado</TableHead>
               {getOrderedHeaders(headers).map((header) => (
-                <TableHead key={header} className="text-center">
+                <TableHead key={header} className="min-w-[140px] text-left">
                   {header}
                 </TableHead>
               ))}
@@ -309,7 +311,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                     <TableCell className="text-center font-bold hidden sm:table-cell">
                       {index + 1}
                     </TableCell>
-                    <TableCell className="sticky left-0 bg-background z-10 text-white">
+                    <TableCell className="bg-background z-10 text-white">
                       <Button
                         onClick={() => handleConfirmGuest(guestId)}
                         variant={isConfirmed ? "default" : "outline"}
@@ -327,7 +329,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                         </span>
                       </Button>
                     </TableCell>
-                    <TableCell className="sticky left-[80px] bg-background z-10 text-white">
+                    <TableCell className="bg-background z-10 text-white">
                       <Badge
                         variant={isConfirmed ? "default" : "secondary"}
                         className={`${
@@ -352,11 +354,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                     {orderedHeaders.map((header, colIndex) => (
                       <TableCell
                         key={header}
-                        className={`max-w-[200px] truncate text-white px-2 py-2 sm:px-4 sm:py-2 ${
-                          colIndex % 2 === 0
-                            ? "bg-primary/10 text-white"
-                            : "bg-accent/10 text-white"
-                        }`}
+                        className={`min-w-[140px] text-white px-2 py-2 sm:px-4 sm:py-2`}
                         style={{
                           fontSize: "1rem",
                           whiteSpace: "normal",
