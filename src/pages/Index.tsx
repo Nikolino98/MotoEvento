@@ -37,13 +37,13 @@ const Index = () => {
                   Validación de Invitados
                 </h1>
                 <p className="text-xs sm:text-sm text-muted-foreground">Sistema de gestión para eventos de motos</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Creado por <a 
+                    className="font-bold bg-gradient-to-t from-blue-400 to-blue-700 bg-clip-text text-transparent" 
+                    href="https://npmdesign.netlify.app/"
+                  >
+                    NPM
+                  </a></p>
               </div>
-            </div>
-            <div className="flex items-center space-x-2 mt-1 sm:mt-0">
-              <Badge variant="outline" className="text-xs">
-                <Database className="h-3 w-3 mr-1" />
-                Listo para BD
-              </Badge>
             </div>
           </div>
         </div>
@@ -146,7 +146,7 @@ const Index = () => {
       <footer className="border-t border-border mt-12">
         <div className="container mx-auto px-4 py-6 text-center">
           <p className="text-sm text-muted-foreground">
-            Sistema de Validación de Invitados - Evento de Motos 2024
+            Sistema de Validación de Invitados - Evento de Motos 2025 - NPM
           </p>
         </div>
       </footer>
