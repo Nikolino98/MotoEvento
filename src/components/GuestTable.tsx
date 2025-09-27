@@ -185,8 +185,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
     // Orden especificado por el usuario
     const desiredOrder = [
       "DNI",
-      "Apellido",
-      "Nombre",
+      "Apellido y Nombre",
       "Grupo sanguíneo",
       "Teléfono",
       "Venís acompañado",
