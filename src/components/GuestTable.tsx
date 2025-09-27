@@ -153,7 +153,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
   const getOrderedHeaders = (headers: string[]): string[] => {
     // Orden especificado por el usuario
     const desiredOrder = [
-      "dni", "apellido y nombre", "Grupo sanguíneo", "Teléfono", 
+      "DNI", "Apellido y Nombre", "Grupo sanguíneo", "Teléfono", 
       "Venís acompañado", "Apellido y Nombre del acompañante", 
       "Contacto de Emergencia", "Tenés carnet Vigente?", "Tenés Seguro vigente?", 
       "Cena show día sábado 11 (no incluye bebida)", "Tenés alguna restricción alimentaria?", 
