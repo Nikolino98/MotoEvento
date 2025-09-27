@@ -185,6 +185,8 @@ export const GuestTable: React.FC<GuestTableProps> = ({
     // Orden especificado por el usuario
     const desiredOrder = [
       "DNI",
+      "Apellido",
+      "Nombre",
       "Apellido y Nombre",
       "Grupo sanguíneo",
       "Teléfono",
@@ -203,41 +205,35 @@ export const GuestTable: React.FC<GuestTableProps> = ({
       "Vas a realizar las rodadas",
     ];
 
-    // Crear un mapa para buscar coincidencias parciales
-    const headerMap = new Map<string, string>();
-    headers.forEach((header) => {
-      // Convertir a minúsculas para comparación insensible a mayúsculas/minúsculas
-      const lowerHeader = header.toLowerCase();
-
-      for (const desiredHeader of desiredOrder) {
-        const lowerDesired = desiredHeader.toLowerCase();
-
-        // Verificar si el encabezado contiene la palabra clave deseada
-        if (
-          lowerHeader.includes(lowerDesired) ||
-          lowerDesired.includes(lowerHeader)
-        ) {
-          headerMap.set(desiredHeader, header);
-          break;
-        }
-      }
-    });
-
-    // Crear el nuevo orden de encabezados
     const orderedHeaders: string[] = [];
 
-    // Primero agregar los encabezados en el orden deseado si existen
+    // 1. Coincidencias exactas (case-insensitive)
     desiredOrder.forEach((desiredHeader) => {
-      const matchedHeader = headerMap.get(desiredHeader);
-      if (matchedHeader && headers.includes(matchedHeader)) {
-        orderedHeaders.push(matchedHeader);
+      const exact = headers.find(
+        (h) => h.trim().toLowerCase() === desiredHeader.trim().toLowerCase()
+      );
+      if (exact && !orderedHeaders.includes(exact)) {
+        orderedHeaders.push(exact);
       }
     });
 
-    // Agregar cualquier encabezado restante que no esté en el orden deseado
-    headers.forEach((header) => {
-      if (!orderedHeaders.includes(header)) {
-        orderedHeaders.push(header);
+    // 2. Coincidencias parciales (case-insensitive)
+    desiredOrder.forEach((desiredHeader) => {
+      headers.forEach((h) => {
+        if (
+          !orderedHeaders.includes(h) &&
+          (h.toLowerCase().includes(desiredHeader.toLowerCase()) ||
+            desiredHeader.toLowerCase().includes(h.toLowerCase()))
+        ) {
+          orderedHeaders.push(h);
+        }
+      });
+    });
+
+    // 3. Agregar cualquier encabezado restante
+    headers.forEach((h) => {
+      if (!orderedHeaders.includes(h)) {
+        orderedHeaders.push(h);
       }
     });
 
