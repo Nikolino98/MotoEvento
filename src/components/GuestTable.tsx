@@ -192,6 +192,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
       "Teléfono",
       "Venís acompañado",
       "Apellido y Nombre del acompañante",
+      "DNI Acompañante",
       "Contacto de Emergencia",
       "Tenés carnet Vigente?",
       "Tenés Seguro vigente?",
