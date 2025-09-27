@@ -184,8 +184,6 @@ export const GuestTable: React.FC<GuestTableProps> = ({
   // 1. Define el array fijo de columnas fuera del componente (o dentro, pero fuera del render)
   const ALL_COLUMNS = [
     "DNI",
-    "Apellido",
-    "Nombre",
     "Apellido y Nombre",
     "Grupo sanguíneo",
     "Teléfono",
