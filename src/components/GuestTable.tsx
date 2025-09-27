@@ -302,13 +302,13 @@ export const GuestTable: React.FC<GuestTableProps> = ({
           </div>
         ) : (
           <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <Table className="w-full">
+            <Table className="w-full text-white text-sm sm:text-base">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[80px] sticky left-0 bg-background z-20">
+                  <TableHead className="w-[80px] sticky left-0 bg-background z-20 text-white">
                     Acción
                   </TableHead>
-                  <TableHead className="w-[70px] sticky left-[80px] bg-background z-20">
+                  <TableHead className="w-[70px] sticky left-[80px] bg-background z-20 text-white">
                     Estado
                   </TableHead>
                   {getOrderedHeaders(
@@ -316,7 +316,10 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                       ? Object.keys(supabaseGuests[0]?.guest_data || {})
                       : headers
                   ).map((header) => (
-                    <TableHead key={header} className="min-w-[120px]">
+                    <TableHead
+                      key={header}
+                      className="min-w-[120px] text-white"
+                    >
                       {header}
                     </TableHead>
                   ))}
@@ -335,9 +338,12 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                   return (
                     <TableRow
                       key={index}
-                      className={isConfirmed ? "bg-success/10" : ""}
+                      className={
+                        (isConfirmed ? "bg-success/10 " : "") +
+                        " text-white text-xs sm:text-base"
+                      }
                     >
-                      <TableCell className="sticky left-0 bg-background z-10">
+                      <TableCell className="sticky left-0 bg-background z-10 text-white">
                         <Button
                           onClick={() => handleConfirmGuest(guestId)}
                           variant={isConfirmed ? "default" : "outline"}
@@ -355,7 +361,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                           </span>
                         </Button>
                       </TableCell>
-                      <TableCell className="sticky left-[80px] bg-background z-10">
+                      <TableCell className="sticky left-[80px] bg-background z-10 text-white">
                         <Badge
                           variant={isConfirmed ? "default" : "secondary"}
                           className={`${
@@ -380,11 +386,16 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                       {orderedHeaders.map((header, colIndex) => (
                         <TableCell
                           key={header}
-                          className={`max-w-[200px] truncate ${
+                          className={`max-w-[200px] truncate text-white px-2 py-2 sm:px-4 sm:py-2 ${
                             colIndex % 2 === 0
-                              ? "bg-primary/10 text-primary"
-                              : "bg-accent/10 text-accent"
+                              ? "bg-primary/10 text-white"
+                              : "bg-accent/10 text-white"
                           }`}
+                          style={{
+                            fontSize: "1rem",
+                            whiteSpace: "normal",
+                            wordBreak: "break-word",
+                          }}
                         >
                           {row[header]?.toString() || "-"}
                         </TableCell>
