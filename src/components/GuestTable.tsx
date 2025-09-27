@@ -271,17 +271,21 @@ export const GuestTable: React.FC<GuestTableProps> = ({
         {/* Guests table */}
         <Table>
           <TableHeader>
-            <TableRow>
-              {/* Orden solo en desktop */}
-              <TableHead className="min-w-[50px] text-center hidden sm:table-cell">
+            <TableRow className="hidden sm:table-row border-b border-gray-700">
+              <TableHead className="min-w-[50px] text-center hidden sm:table-cell border-r border-gray-700 bg-background">
                 N°
               </TableHead>
-              <TableHead className="min-w-[120px] text-left">
+              <TableHead className="min-w-[120px] text-left border-r border-gray-700 bg-background">
                 Acciones
               </TableHead>
-              <TableHead className="min-w-[120px] text-left">Estado</TableHead>
+              <TableHead className="min-w-[120px] text-left border-r border-gray-700 bg-background">
+                Estado
+              </TableHead>
               {getOrderedHeaders(headers).map((header) => (
-                <TableHead key={header} className="min-w-[140px] text-left">
+                <TableHead
+                  key={header}
+                  className="min-w-[140px] text-left border-r border-gray-700 bg-background"
+                >
                   {header}
                 </TableHead>
               ))}
@@ -302,16 +306,16 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                   {/* Desktop row */}
                   <TableRow
                     className={
-                      "hidden sm:table-row " +
+                      "hidden sm:table-row border-b border-gray-700 " +
                       (isConfirmed ? "bg-success/10 " : "") +
                       " text-white text-xs sm:text-base"
                     }
                   >
                     {/* Número de orden solo en desktop */}
-                    <TableCell className="text-center font-bold hidden sm:table-cell">
+                    <TableCell className="text-center font-bold hidden sm:table-cell border-r border-gray-700">
                       {index + 1}
                     </TableCell>
-                    <TableCell className="bg-background z-10 text-white">
+                    <TableCell className="bg-background z-10 text-white border-r border-gray-700">
                       <Button
                         onClick={() => handleConfirmGuest(guestId)}
                         variant={isConfirmed ? "default" : "outline"}
@@ -329,7 +333,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                         </span>
                       </Button>
                     </TableCell>
-                    <TableCell className="bg-background z-10 text-white">
+                    <TableCell className="bg-background z-10 text-white border-r border-gray-700">
                       <Badge
                         variant={isConfirmed ? "default" : "secondary"}
                         className={`${
@@ -354,7 +358,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                     {orderedHeaders.map((header, colIndex) => (
                       <TableCell
                         key={header}
-                        className={`min-w-[140px] text-white px-2 py-2 sm:px-4 sm:py-2`}
+                        className="min-w-[140px] text-white px-2 py-2 sm:px-4 sm:py-2 border-r border-gray-700"
                         style={{
                           fontSize: "1rem",
                           whiteSpace: "normal",
