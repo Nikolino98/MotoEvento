@@ -181,66 +181,29 @@ export const GuestTable: React.FC<GuestTableProps> = ({
     return `guest_${index}`;
   };
 
-  // Función para reordenar las columnas según el orden especificado
-  const getOrderedHeaders = (headers: string[]): string[] => {
-    // Orden especificado por el usuario
-    const desiredOrder = [
-      "DNI",
-      "Apellido",
-      "Nombre",
-      "Apellido y Nombre",
-      "Grupo sanguíneo",
-      "Teléfono",
-      "Venís acompañado",
-      "Apellido y Nombre del acompañante",
-      "DNI Acompañante",
-      "Contacto de Emergencia",
-      "Tenés carnet Vigente?",
-      "Tenés Seguro vigente?",
-      "Cena show día sábado 11 (no incluye bebida)",
-      "Tenés alguna restricción alimentaria?",
-      "Moto en la que venís",
-      "Ciudad de donde nos visitas",
-      "Provincia",
-      "Sos alérgico a algo?",
-      "A que sos alérgico?",
-      "Vas a realizar las rodadas",
-    ];
-
-    const orderedHeaders: string[] = [];
-
-    // 1. Coincidencias exactas (case-insensitive)
-    desiredOrder.forEach((desiredHeader) => {
-      const exact = headers.find(
-        (h) => h.trim().toLowerCase() === desiredHeader.trim().toLowerCase()
-      );
-      if (exact && !orderedHeaders.includes(exact)) {
-        orderedHeaders.push(exact);
-      }
-    });
-
-    // 2. Coincidencias parciales (case-insensitive)
-    desiredOrder.forEach((desiredHeader) => {
-      headers.forEach((h) => {
-        if (
-          !orderedHeaders.includes(h) &&
-          (h.toLowerCase().includes(desiredHeader.toLowerCase()) ||
-            desiredOrder.includes(h.trim().toLowerCase()))
-        ) {
-          orderedHeaders.push(h);
-        }
-      });
-    });
-
-    // 3. Agregar el resto de los headers que no coinciden
-    headers.forEach((h) => {
-      if (!orderedHeaders.includes(h)) {
-        orderedHeaders.push(h);
-      }
-    });
-
-    return orderedHeaders;
-  };
+  // 1. Define el array fijo de columnas fuera del componente (o dentro, pero fuera del render)
+  const ALL_COLUMNS = [
+    "DNI",
+    "Apellido",
+    "Nombre",
+    "Apellido y Nombre",
+    "Grupo sanguíneo",
+    "Teléfono",
+    "Venís acompañado",
+    "Apellido y Nombre del acompañante",
+    "DNI Acompañante",
+    "Contacto de Emergencia",
+    "Tenés carnet Vigente?",
+    "Tenés Seguro vigente?",
+    "Cena show día sábado 11 (no incluye bebida)",
+    "Tenés alguna restricción alimentaria?",
+    "Moto en la que venís",
+    "Ciudad de donde nos visitas",
+    "Provincia",
+    "Sos alérgico a algo?",
+    "A que sos alérgico?",
+    "Vas a realizar las rodadas",
+  ];
 
   return (
     <Card className="p-4 sm:p-6 lg:p-8">
@@ -281,7 +244,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
               <TableHead className="min-w-[120px] text-left border-r border-gray-700 bg-background">
                 Estado
               </TableHead>
-              {getOrderedHeaders(headers).map((header) => (
+              {ALL_COLUMNS.map((header) => (
                 <TableHead
                   key={header}
                   className="min-w-[140px] text-left border-r border-gray-700 bg-background"
@@ -295,11 +258,6 @@ export const GuestTable: React.FC<GuestTableProps> = ({
             {filteredData.map((row, index) => {
               const guestId = getGuestId(row, index);
               const isConfirmed = confirmedGuests.has(guestId);
-              const orderedHeaders = getOrderedHeaders(
-                supabaseGuests.length > 0
-                  ? Object.keys(supabaseGuests[0]?.guest_data || {})
-                  : headers
-              );
 
               return (
                 <React.Fragment key={index}>
@@ -311,7 +269,6 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                       " text-white text-xs sm:text-base"
                     }
                   >
-                    {/* Número de orden solo en desktop */}
                     <TableCell className="text-center font-bold hidden sm:table-cell border-r border-gray-700">
                       {index + 1}
                     </TableCell>
@@ -355,7 +312,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                         )}
                       </Badge>
                     </TableCell>
-                    {orderedHeaders.map((header, colIndex) => (
+                    {ALL_COLUMNS.map((header) => (
                       <TableCell
                         key={header}
                         className="min-w-[140px] text-white px-2 py-2 sm:px-4 sm:py-2 border-r border-gray-700"
@@ -379,10 +336,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                     }
                     onClick={() => setOpenRow(openRow === index ? null : index)}
                   >
-                    <TableCell
-                      colSpan={2 + orderedHeaders.length}
-                      className="p-0"
-                    >
+                    <TableCell colSpan={2 + ALL_COLUMNS.length} className="p-0">
                       <div className="flex flex-col">
                         {/* Header: solo nombre o id, sin orden */}
                         <div className="flex items-center justify-between px-3 py-2">
@@ -436,7 +390,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                         {openRow === index && (
                           <div className="bg-background/80 px-3 pb-3 rounded-b">
                             <div className="grid grid-cols-1 gap-1">
-                              {orderedHeaders.map((header) => (
+                              {ALL_COLUMNS.map((header) => (
                                 <div key={header} className="flex text-xs py-1">
                                   <span className="font-semibold min-w-[110px] text-orange-400">
                                     {header}:
