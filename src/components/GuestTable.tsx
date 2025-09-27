@@ -1,12 +1,19 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Search, Users, CheckCircle2, Clock, UserCheck } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import React, { useState, useMemo, useEffect } from "react";
+import { Search, Users, CheckCircle2, Clock, UserCheck } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface GuestTableProps {
   data: any[];
@@ -15,32 +22,34 @@ interface GuestTableProps {
   onSearchChange: (term: string) => void;
 }
 
-export const GuestTable: React.FC<GuestTableProps> = ({ 
-  data, 
-  headers, 
-  searchTerm, 
-  onSearchChange 
+export const GuestTable: React.FC<GuestTableProps> = ({
+  data,
+  headers,
+  searchTerm,
+  onSearchChange,
 }) => {
-  const [confirmedGuests, setConfirmedGuests] = useState<Set<string>>(new Set());
+  const [confirmedGuests, setConfirmedGuests] = useState<Set<string>>(
+    new Set()
+  );
   const [supabaseGuests, setSupabaseGuests] = useState<any[]>([]);
   const { toast } = useToast();
 
   // Load guests from Supabase on component mount
   useEffect(() => {
     loadGuestsFromSupabase();
-    
+
     // Set up real-time subscription
     const channel = supabase
-      .channel('schema-db-changes')
+      .channel("schema-db-changes")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'guests'
+          event: "*",
+          schema: "public",
+          table: "guests",
         },
         (payload) => {
-          console.log('Real-time update:', payload);
+          console.log("Real-time update:", payload);
           loadGuestsFromSupabase();
         }
       )
@@ -54,40 +63,46 @@ export const GuestTable: React.FC<GuestTableProps> = ({
   const loadGuestsFromSupabase = async () => {
     try {
       const { data: guests, error } = await supabase
-        .from('guests')
-        .select('*')
-        .order('created_at', { ascending: true });
-        
+        .from("guests")
+        .select("*")
+        .order("created_at", { ascending: true });
+
       if (error) throw error;
-      
+
       if (guests) {
         setSupabaseGuests(guests);
         // Update confirmed guests set
         const confirmed = new Set(
-          guests.filter(g => g.confirmed).map(g => g.guest_id)
+          guests.filter((g) => g.confirmed).map((g) => g.guest_id)
         );
         setConfirmedGuests(confirmed);
       }
     } catch (error: any) {
-      console.error('Error loading guests:', error);
+      console.error("Error loading guests:", error);
       toast({
         title: "Error al cargar datos",
-        description: "No se pudieron cargar los invitados desde la base de datos.",
+        description:
+          "No se pudieron cargar los invitados desde la base de datos.",
         variant: "destructive",
       });
     }
   };
 
   // Use Supabase data if available, otherwise use local data
-  const currentData = supabaseGuests.length > 0 
-    ? supabaseGuests.map(g => ({ ...g.guest_data, _supabase_id: g.id, _guest_id: g.guest_id }))
-    : data;
+  const currentData =
+    supabaseGuests.length > 0
+      ? supabaseGuests.map((g) => ({
+          ...g.guest_data,
+          _supabase_id: g.id,
+          _guest_id: g.guest_id,
+        }))
+      : data;
 
   const filteredData = useMemo(() => {
     if (!searchTerm.trim()) return currentData;
-    
-    return currentData.filter(row =>
-      Object.values(row).some(value =>
+
+    return currentData.filter((row) =>
+      Object.values(row).some((value) =>
         value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
@@ -96,19 +111,19 @@ export const GuestTable: React.FC<GuestTableProps> = ({
   const handleConfirmGuest = async (guestId: string) => {
     try {
       const isCurrentlyConfirmed = confirmedGuests.has(guestId);
-      
+
       const { error } = await supabase
-        .from('guests')
-        .update({ 
+        .from("guests")
+        .update({
           confirmed: !isCurrentlyConfirmed,
-          confirmed_at: !isCurrentlyConfirmed ? new Date().toISOString() : null
+          confirmed_at: !isCurrentlyConfirmed ? new Date().toISOString() : null,
         })
-        .eq('guest_id', guestId);
-        
+        .eq("guest_id", guestId);
+
       if (error) throw error;
-      
+
       // Update local state
-      setConfirmedGuests(prev => {
+      setConfirmedGuests((prev) => {
         const newSet = new Set(prev);
         if (newSet.has(guestId)) {
           newSet.delete(guestId);
@@ -117,13 +132,17 @@ export const GuestTable: React.FC<GuestTableProps> = ({
         }
         return newSet;
       });
-      
+
       toast({
-        title: isCurrentlyConfirmed ? "Confirmación cancelada" : "Invitado confirmado",
-        description: `El invitado ${guestId} ha sido ${isCurrentlyConfirmed ? 'des' : ''}confirmado.`,
+        title: isCurrentlyConfirmed
+          ? "Confirmación cancelada"
+          : "Invitado confirmado",
+        description: `El invitado ${guestId} ha sido ${
+          isCurrentlyConfirmed ? "des" : ""
+        }confirmado.`,
       });
     } catch (error: any) {
-      console.error('Error updating guest:', error);
+      console.error("Error updating guest:", error);
       toast({
         title: "Error al actualizar",
         description: "No se pudo actualizar el estado del invitado.",
@@ -137,65 +156,92 @@ export const GuestTable: React.FC<GuestTableProps> = ({
     if (row._guest_id) {
       return row._guest_id;
     }
-    
+
     // Try to find a field that could be an ID
-    const possibleIdFields = ['id', 'ID', 'Id', 'código', 'codigo', 'Código', 'Codigo'];
+    const possibleIdFields = [
+      "id",
+      "ID",
+      "Id",
+      "código",
+      "codigo",
+      "Código",
+      "Codigo",
+    ];
     for (const field of possibleIdFields) {
-      if (row[field] !== undefined && row[field] !== null && row[field] !== '') {
+      if (
+        row[field] !== undefined &&
+        row[field] !== null &&
+        row[field] !== ""
+      ) {
         return row[field].toString();
       }
     }
     // If no ID field found, use row index
     return `guest_${index}`;
   };
-  
+
   // Función para reordenar las columnas según el orden especificado
   const getOrderedHeaders = (headers: string[]): string[] => {
     // Orden especificado por el usuario
     const desiredOrder = [
-      "DNI", "Apellido y Nombre", "Grupo sanguíneo", "Teléfono", 
-      "Venís acompañado", "Apellido y Nombre del acompañante", 
-      "Contacto de Emergencia", "Tenés carnet Vigente?", "Tenés Seguro vigente?", 
-      "Cena show día sábado 11 (no incluye bebida)", "Tenés alguna restricción alimentaria?", 
-      "Moto en la que venís", "Ciudad de donde nos visitas", "Provincia", 
-      "Sos alérgico a algo?", "A que sos alérgico?", "Vas a realizar las rodadas"
+      "DNI",
+      "Apellido",
+      "Nombre",
+      "Grupo sanguíneo",
+      "Teléfono",
+      "Venís acompañado",
+      "Apellido y Nombre del acompañante",
+      "Contacto de Emergencia",
+      "Tenés carnet Vigente?",
+      "Tenés Seguro vigente?",
+      "Cena show día sábado 11 (no incluye bebida)",
+      "Tenés alguna restricción alimentaria?",
+      "Moto en la que venís",
+      "Ciudad de donde nos visitas",
+      "Provincia",
+      "Sos alérgico a algo?",
+      "A que sos alérgico?",
+      "Vas a realizar las rodadas",
     ];
-    
+
     // Crear un mapa para buscar coincidencias parciales
     const headerMap = new Map<string, string>();
-    headers.forEach(header => {
+    headers.forEach((header) => {
       // Convertir a minúsculas para comparación insensible a mayúsculas/minúsculas
       const lowerHeader = header.toLowerCase();
-      
+
       for (const desiredHeader of desiredOrder) {
         const lowerDesired = desiredHeader.toLowerCase();
-        
+
         // Verificar si el encabezado contiene la palabra clave deseada
-        if (lowerHeader.includes(lowerDesired) || lowerDesired.includes(lowerHeader)) {
+        if (
+          lowerHeader.includes(lowerDesired) ||
+          lowerDesired.includes(lowerHeader)
+        ) {
           headerMap.set(desiredHeader, header);
           break;
         }
       }
     });
-    
+
     // Crear el nuevo orden de encabezados
     const orderedHeaders: string[] = [];
-    
+
     // Primero agregar los encabezados en el orden deseado si existen
-    desiredOrder.forEach(desiredHeader => {
+    desiredOrder.forEach((desiredHeader) => {
       const matchedHeader = headerMap.get(desiredHeader);
       if (matchedHeader && headers.includes(matchedHeader)) {
         orderedHeaders.push(matchedHeader);
       }
     });
-    
+
     // Agregar cualquier encabezado restante que no esté en el orden deseado
-    headers.forEach(header => {
+    headers.forEach((header) => {
       if (!orderedHeaders.includes(header)) {
         orderedHeaders.push(header);
       }
     });
-    
+
     return orderedHeaders;
   };
 
@@ -228,7 +274,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
             className="pl-10"
           />
         </div>
-        
+
         {/* Summary badges */}
         <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-border">
           <Badge variant="outline" className="text-xs">
@@ -263,9 +309,17 @@ export const GuestTable: React.FC<GuestTableProps> = ({
             <Table className="w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[80px] sticky left-0 bg-background z-20">Acción</TableHead>
-                  <TableHead className="w-[70px] sticky left-[80px] bg-background z-20">Estado</TableHead>
-                  {getOrderedHeaders(supabaseGuests.length > 0 ? Object.keys(supabaseGuests[0]?.guest_data || {}) : headers).map((header) => (
+                  <TableHead className="w-[80px] sticky left-0 bg-background z-20">
+                    Acción
+                  </TableHead>
+                  <TableHead className="w-[70px] sticky left-[80px] bg-background z-20">
+                    Estado
+                  </TableHead>
+                  {getOrderedHeaders(
+                    supabaseGuests.length > 0
+                      ? Object.keys(supabaseGuests[0]?.guest_data || {})
+                      : headers
+                  ).map((header) => (
                     <TableHead key={header} className="min-w-[120px]">
                       {header}
                     </TableHead>
@@ -276,10 +330,14 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                 {filteredData.map((row, index) => {
                   const guestId = getGuestId(row, index);
                   const isConfirmed = confirmedGuests.has(guestId);
-                  const orderedHeaders = getOrderedHeaders(supabaseGuests.length > 0 ? Object.keys(supabaseGuests[0]?.guest_data || {}) : headers);
-                  
+                  const orderedHeaders = getOrderedHeaders(
+                    supabaseGuests.length > 0
+                      ? Object.keys(supabaseGuests[0]?.guest_data || {})
+                      : headers
+                  );
+
                   return (
-                    <TableRow 
+                    <TableRow
                       key={index}
                       className={isConfirmed ? "bg-success/10" : ""}
                     >
@@ -288,17 +346,27 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                           onClick={() => handleConfirmGuest(guestId)}
                           variant={isConfirmed ? "default" : "outline"}
                           size="sm"
-                          className={`${isConfirmed ? "bg-success hover:bg-success/90" : ""} px-2 py-1 h-auto text-xs sm:text-sm`}
+                          className={`${
+                            isConfirmed ? "bg-success hover:bg-success/90" : ""
+                          } px-2 py-1 h-auto text-xs sm:text-sm`}
                         >
                           <CheckCircle2 className="h-3 w-3 mr-1" />
-                          <span className="hidden sm:inline">{isConfirmed ? 'Confirmado' : 'Confirmar'}</span>
-                          <span className="inline sm:hidden">{isConfirmed ? 'OK' : 'OK?'}</span>
+                          <span className="hidden sm:inline">
+                            {isConfirmed ? "Confirmado" : "Confirmar"}
+                          </span>
+                          <span className="inline sm:hidden">
+                            {isConfirmed ? "OK" : "OK?"}
+                          </span>
                         </Button>
                       </TableCell>
                       <TableCell className="sticky left-[80px] bg-background z-10">
-                        <Badge 
+                        <Badge
                           variant={isConfirmed ? "default" : "secondary"}
-                          className={`${isConfirmed ? "bg-success/20 text-success border-success/30" : ""} text-xs px-1 py-0`}
+                          className={`${
+                            isConfirmed
+                              ? "bg-success/20 text-success border-success/30"
+                              : ""
+                          } text-xs px-1 py-0`}
                         >
                           {isConfirmed ? (
                             <>
@@ -314,11 +382,15 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                         </Badge>
                       </TableCell>
                       {orderedHeaders.map((header, colIndex) => (
-                        <TableCell 
-                          key={header} 
-                          className={`max-w-[200px] truncate ${colIndex % 2 === 0 ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'}`}
+                        <TableCell
+                          key={header}
+                          className={`max-w-[200px] truncate ${
+                            colIndex % 2 === 0
+                              ? "bg-primary/10 text-primary"
+                              : "bg-accent/10 text-accent"
+                          }`}
                         >
-                          {row[header]?.toString() || '-'}
+                          {row[header]?.toString() || "-"}
                         </TableCell>
                       ))}
                     </TableRow>
