@@ -148,6 +148,56 @@ export const GuestTable: React.FC<GuestTableProps> = ({
     // If no ID field found, use row index
     return `guest_${index}`;
   };
+  
+  // Función para reordenar las columnas según el orden especificado
+  const getOrderedHeaders = (headers: string[]): string[] => {
+    // Orden especificado por el usuario
+    const desiredOrder = [
+      "dni", "apellido y nombre", "Grupo sanguíneo", "Teléfono", 
+      "Venís acompañado", "Apellido y Nombre del acompañante", 
+      "Contacto de Emergencia", "Tenés carnet Vigente?", "Tenés Seguro vigente?", 
+      "Cena show día sábado 11 (no incluye bebida)", "Tenés alguna restricción alimentaria?", 
+      "Moto en la que venís", "Ciudad de donde nos visitas", "Provincia", 
+      "Sos alérgico a algo?", "A que sos alérgico?", "Vas a realizar las rodadas"
+    ];
+    
+    // Crear un mapa para buscar coincidencias parciales
+    const headerMap = new Map<string, string>();
+    headers.forEach(header => {
+      // Convertir a minúsculas para comparación insensible a mayúsculas/minúsculas
+      const lowerHeader = header.toLowerCase();
+      
+      for (const desiredHeader of desiredOrder) {
+        const lowerDesired = desiredHeader.toLowerCase();
+        
+        // Verificar si el encabezado contiene la palabra clave deseada
+        if (lowerHeader.includes(lowerDesired) || lowerDesired.includes(lowerHeader)) {
+          headerMap.set(desiredHeader, header);
+          break;
+        }
+      }
+    });
+    
+    // Crear el nuevo orden de encabezados
+    const orderedHeaders: string[] = [];
+    
+    // Primero agregar los encabezados en el orden deseado si existen
+    desiredOrder.forEach(desiredHeader => {
+      const matchedHeader = headerMap.get(desiredHeader);
+      if (matchedHeader && headers.includes(matchedHeader)) {
+        orderedHeaders.push(matchedHeader);
+      }
+    });
+    
+    // Agregar cualquier encabezado restante que no esté en el orden deseado
+    headers.forEach(header => {
+      if (!orderedHeaders.includes(header)) {
+        orderedHeaders.push(header);
+      }
+    });
+    
+    return orderedHeaders;
+  };
 
   if (currentData.length === 0) {
     return (
@@ -215,7 +265,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                 <TableRow>
                   <TableHead className="w-[80px] sticky left-0 bg-background z-20">Acción</TableHead>
                   <TableHead className="w-[70px] sticky left-[80px] bg-background z-20">Estado</TableHead>
-                  {(supabaseGuests.length > 0 ? Object.keys(supabaseGuests[0]?.guest_data || {}) : headers).map((header) => (
+                  {getOrderedHeaders(supabaseGuests.length > 0 ? Object.keys(supabaseGuests[0]?.guest_data || {}) : headers).map((header) => (
                     <TableHead key={header} className="min-w-[120px]">
                       {header}
                     </TableHead>
@@ -226,6 +276,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                 {filteredData.map((row, index) => {
                   const guestId = getGuestId(row, index);
                   const isConfirmed = confirmedGuests.has(guestId);
+                  const orderedHeaders = getOrderedHeaders(supabaseGuests.length > 0 ? Object.keys(supabaseGuests[0]?.guest_data || {}) : headers);
                   
                   return (
                     <TableRow 
@@ -262,7 +313,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                           )}
                         </Badge>
                       </TableCell>
-                      {(supabaseGuests.length > 0 ? Object.keys(supabaseGuests[0]?.guest_data || {}) : headers).map((header, colIndex) => (
+                      {orderedHeaders.map((header, colIndex) => (
                         <TableCell 
                           key={header} 
                           className={`max-w-[200px] truncate ${colIndex % 2 === 0 ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'}`}
