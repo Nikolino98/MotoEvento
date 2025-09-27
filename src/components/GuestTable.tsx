@@ -225,14 +225,14 @@ export const GuestTable: React.FC<GuestTableProps> = ({
         if (
           !orderedHeaders.includes(h) &&
           (h.toLowerCase().includes(desiredHeader.toLowerCase()) ||
-            desiredHeader.toLowerCase().includes(h.toLowerCase()))
+            desiredOrder.includes(h.trim().toLowerCase()))
         ) {
           orderedHeaders.push(h);
         }
       });
     });
 
-    // 3. Agregar cualquier encabezado restante
+    // 3. Agregar el resto de los headers que no coinciden
     headers.forEach((h) => {
       if (!orderedHeaders.includes(h)) {
         orderedHeaders.push(h);
@@ -242,131 +242,165 @@ export const GuestTable: React.FC<GuestTableProps> = ({
     return orderedHeaders;
   };
 
-  if (currentData.length === 0) {
-    return (
-      <Card className="card-moto">
-        <div className="text-center py-12">
-          <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-foreground mb-2">
-            No hay invitados cargados
-          </h3>
-          <p className="text-muted-foreground">
-            Carga un archivo CSV o Excel para ver la lista de invitados
-          </p>
-        </div>
-      </Card>
-    );
-  }
-
   return (
-    <div className="space-y-6">
-      {/* Search Bar */}
-      <Card className="card-moto">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+    <Card className="p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col gap-4">
+        {/* Search and actions */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <Input
-            placeholder="Buscar invitado por ID, nombre o cualquier campo..."
+            placeholder="Buscar invitado..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10"
+            className="max-w-sm flex-1"
           />
+          <Button
+            onClick={() => {}}
+            variant="default"
+            className="whitespace-nowrap"
+          >
+            <UserCheck className="h-4 w-4 mr-2" />
+            Sin confirmar{" "}
+            {
+              filteredData.filter(
+                (row) => !confirmedGuests.has(getGuestId(row, 0))
+              ).length
+            }
+          </Button>
         </div>
 
-        {/* Summary badges */}
-        <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-border">
-          <Badge variant="outline" className="text-xs">
-            <Users className="h-3 w-3 mr-1" />
-            Total: {currentData.length}
-          </Badge>
-          <Badge variant="outline" className="text-xs">
-            <Search className="h-3 w-3 mr-1" />
-            Filtrados: {filteredData.length}
-          </Badge>
-          <Badge variant="outline" className="text-xs">
-            <UserCheck className="h-3 w-3 mr-1" />
-            Confirmados: {confirmedGuests.size}
-          </Badge>
-        </div>
-      </Card>
+        {/* Guests table */}
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[120px] text-center">Acciones</TableHead>
+              <TableHead className="w-[120px] text-center">Estado</TableHead>
+              {getOrderedHeaders(headers).map((header) => (
+                <TableHead key={header} className="text-center">
+                  {header}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredData.map((row, index) => {
+              const guestId = getGuestId(row, index);
+              const isConfirmed = confirmedGuests.has(guestId);
+              const orderedHeaders = getOrderedHeaders(
+                supabaseGuests.length > 0
+                  ? Object.keys(supabaseGuests[0]?.guest_data || {})
+                  : headers
+              );
 
-      {/* Results */}
-      <Card className="card-moto">
-        {filteredData.length === 0 && searchTerm ? (
-          <div className="text-center py-12">
-            <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              Invitado no encontrado
-            </h3>
-            <p className="text-muted-foreground">
-              No se encontraron resultados para "{searchTerm}"
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <Table className="w-full text-white text-sm sm:text-base">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[80px] sticky left-0 bg-background z-20 text-white">
-                    Acción
-                  </TableHead>
-                  <TableHead className="w-[70px] sticky left-[80px] bg-background z-20 text-white">
-                    Estado
-                  </TableHead>
-                  {getOrderedHeaders(
-                    supabaseGuests.length > 0
-                      ? Object.keys(supabaseGuests[0]?.guest_data || {})
-                      : headers
-                  ).map((header) => (
-                    <TableHead
-                      key={header}
-                      className="min-w-[120px] text-white"
-                    >
-                      {header}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredData.map((row, index) => {
-                  const guestId = getGuestId(row, index);
-                  const isConfirmed = confirmedGuests.has(guestId);
-                  const orderedHeaders = getOrderedHeaders(
-                    supabaseGuests.length > 0
-                      ? Object.keys(supabaseGuests[0]?.guest_data || {})
-                      : headers
-                  );
-
-                  return (
-                    <React.Fragment key={index}>
-                      {/* Desktop row */}
-                      <TableRow
-                        className={
-                          "hidden sm:table-row " +
-                          (isConfirmed ? "bg-success/10 " : "") +
-                          " text-white text-xs sm:text-base"
-                        }
+              return (
+                <React.Fragment key={index}>
+                  {/* Desktop row */}
+                  <TableRow
+                    className={
+                      "hidden sm:table-row " +
+                      (isConfirmed ? "bg-success/10 " : "") +
+                      " text-white text-xs sm:text-base"
+                    }
+                  >
+                    <TableCell className="sticky left-0 bg-background z-10 text-white">
+                      <Button
+                        onClick={() => handleConfirmGuest(guestId)}
+                        variant={isConfirmed ? "default" : "outline"}
+                        size="sm"
+                        className={`${
+                          isConfirmed ? "bg-success hover:bg-success/90" : ""
+                        } px-2 py-1 h-auto text-xs sm:text-sm`}
                       >
-                        <TableCell className="sticky left-0 bg-background z-10 text-white">
+                        <CheckCircle2 className="h-3 w-3 mr-1" />
+                        <span className="hidden sm:inline">
+                          {isConfirmed ? "Confirmado" : "Confirmar"}
+                        </span>
+                        <span className="inline sm:hidden">
+                          {isConfirmed ? "OK" : "OK?"}
+                        </span>
+                      </Button>
+                    </TableCell>
+                    <TableCell className="sticky left-[80px] bg-background z-10 text-white">
+                      <Badge
+                        variant={isConfirmed ? "default" : "secondary"}
+                        className={`${
+                          isConfirmed
+                            ? "bg-success/20 text-success border-success/30"
+                            : ""
+                        } text-xs px-1 py-0`}
+                      >
+                        {isConfirmed ? (
+                          <>
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                            Confirmado
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="h-3 w-3 mr-1" />
+                            Pendiente
+                          </>
+                        )}
+                      </Badge>
+                    </TableCell>
+                    {orderedHeaders.map((header, colIndex) => (
+                      <TableCell
+                        key={header}
+                        className={`max-w-[200px] truncate text-white px-2 py-2 sm:px-4 sm:py-2 ${
+                          colIndex % 2 === 0
+                            ? "bg-primary/10 text-white"
+                            : "bg-accent/10 text-white"
+                        }`}
+                        style={{
+                          fontSize: "1rem",
+                          whiteSpace: "normal",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {row[header]?.toString() || "-"}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+
+                  {/* Mobile row as accordion */}
+                  <TableRow
+                    className={
+                      "sm:hidden cursor-pointer " +
+                      (isConfirmed ? "bg-success/10 " : "") +
+                      " text-white"
+                    }
+                    onClick={() => setOpenRow(openRow === index ? null : index)}
+                  >
+                    <TableCell
+                      colSpan={2 + orderedHeaders.length}
+                      className="p-0"
+                    >
+                      <div className="flex flex-col">
+                        {/* Header: solo nombre o id, sin orden */}
+                        <div className="flex items-center justify-between px-3 py-2">
+                          <span className="font-bold text-base">
+                            {row["Nombre"] ||
+                              row["Apellido y Nombre"] ||
+                              guestId}
+                          </span>
+                          <span>{openRow === index ? "▲" : "▼"}</span>
+                        </div>
+                        {/* Confirm button and status */}
+                        <div className="flex items-center gap-2 mb-2 px-3">
                           <Button
-                            onClick={() => handleConfirmGuest(guestId)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleConfirmGuest(guestId);
+                            }}
                             variant={isConfirmed ? "default" : "outline"}
                             size="sm"
                             className={`${
                               isConfirmed
                                 ? "bg-success hover:bg-success/90"
                                 : ""
-                            } px-2 py-1 h-auto text-xs sm:text-sm`}
+                            } px-2 py-1 h-auto text-xs`}
                           >
                             <CheckCircle2 className="h-3 w-3 mr-1" />
-                            <span className="hidden sm:inline">
-                              {isConfirmed ? "Confirmado" : "Confirmar"}
-                            </span>
-                            <span className="inline sm:hidden">
-                              {isConfirmed ? "OK" : "OK?"}
-                            </span>
+                            {isConfirmed ? "Confirmado" : "Confirmar"}
                           </Button>
-                        </TableCell>
-                        <TableCell className="sticky left-[80px] bg-background z-10 text-white">
                           <Badge
                             variant={isConfirmed ? "default" : "secondary"}
                             className={`${
@@ -387,118 +421,33 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                               </>
                             )}
                           </Badge>
-                        </TableCell>
-                        {orderedHeaders.map((header, colIndex) => (
-                          <TableCell
-                            key={header}
-                            className={`max-w-[200px] truncate text-white px-2 py-2 sm:px-4 sm:py-2 ${
-                              colIndex % 2 === 0
-                                ? "bg-primary/10 text-white"
-                                : "bg-accent/10 text-white"
-                            }`}
-                            style={{
-                              fontSize: "1rem",
-                              whiteSpace: "normal",
-                              wordBreak: "break-word",
-                            }}
-                          >
-                            {row[header]?.toString() || "-"}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-
-                      {/* Mobile row as accordion */}
-                      <TableRow
-                        className={
-                          "sm:hidden cursor-pointer " +
-                          (isConfirmed ? "bg-success/10 " : "") +
-                          " text-white"
-                        }
-                        onClick={() =>
-                          setOpenRow(openRow === index ? null : index)
-                        }
-                      >
-                        <TableCell
-                          colSpan={2 + orderedHeaders.length}
-                          className="p-0"
-                        >
-                          <div className="flex flex-col">
-                            {/* Header: Nombre o ID */}
-                            <div className="flex items-center justify-between px-3 py-2">
-                              <span className="font-bold text-base">
-                                {row["Nombre"] ||
-                                  row["Apellido y Nombre"] ||
-                                  guestId}
-                              </span>
-                              <span>{openRow === index ? "▲" : "▼"}</span>
-                            </div>
-                            {/* Confirm button and status - SIEMPRE ARRIBA */}
-                            <div className="flex items-center gap-2 mb-2 px-3">
-                              <Button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleConfirmGuest(guestId);
-                                }}
-                                variant={isConfirmed ? "default" : "outline"}
-                                size="sm"
-                                className={`${
-                                  isConfirmed
-                                    ? "bg-success hover:bg-success/90"
-                                    : ""
-                                } px-2 py-1 h-auto text-xs`}
-                              >
-                                <CheckCircle2 className="h-3 w-3 mr-1" />
-                                {isConfirmed ? "Confirmado" : "Confirmar"}
-                              </Button>
-                              <Badge
-                                variant={isConfirmed ? "default" : "secondary"}
-                                className={`${
-                                  isConfirmed
-                                    ? "bg-success/20 text-success border-success/30"
-                                    : ""
-                                } text-xs px-1 py-0`}
-                              >
-                                {isConfirmed ? (
-                                  <>
-                                    <CheckCircle2 className="h-3 w-3 mr-1" />
-                                    Confirmado
-                                  </>
-                                ) : (
-                                  <>
-                                    <Clock className="h-3 w-3 mr-1" />
-                                    Pendiente
-                                  </>
-                                )}
-                              </Badge>
-                            </div>
-                            {/* Accordion content */}
-                            {openRow === index && (
-                              <div className="bg-background/80 px-3 pb-3 rounded-b">
-                                <div className="grid grid-cols-1 gap-1">
-                                  {orderedHeaders.map((header) => (
-                                    <div key={header} className="flex text-xs">
-                                      <span className="font-semibold min-w-[110px]">
-                                        {header}:
-                                      </span>
-                                      <span className="ml-2 break-words">
-                                        {row[header]?.toString() || "-"}
-                                      </span>
-                                    </div>
-                                  ))}
+                        </div>
+                        {/* Accordion content */}
+                        {openRow === index && (
+                          <div className="bg-background/80 px-3 pb-3 rounded-b">
+                            <div className="grid grid-cols-1 gap-1">
+                              {orderedHeaders.map((header) => (
+                                <div key={header} className="flex text-xs py-1">
+                                  <span className="font-semibold min-w-[110px] text-orange-400">
+                                    {header}:
+                                  </span>
+                                  <span className="ml-2 break-words text-white">
+                                    {row[header]?.toString() || "-"}
+                                  </span>
                                 </div>
-                              </div>
-                            )}
+                              ))}
+                            </div>
                           </div>
-                        </TableCell>
-                      </TableRow>
-                    </React.Fragment>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </Card>
-    </div>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                </React.Fragment>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+    </Card>
   );
 };
