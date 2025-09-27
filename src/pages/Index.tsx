@@ -1,21 +1,39 @@
-import React, { useState } from 'react';
-import { Bike, Users, Database } from 'lucide-react';
-import { CSVUploader } from '@/components/CSVUploader';
-import { GuestTable } from '@/components/GuestTable';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import motoLogo from '@/assets/moto-logo.png';
-import motoEventHero from '@/assets/moto-event-hero.jpg';
+import React, { useState, useEffect } from "react";
+import { Bike, Users, Database } from "lucide-react";
+import { CSVUploader } from "@/components/CSVUploader";
+import { GuestTable } from "@/components/GuestTable";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import motoLogo from "@/assets/moto-logo.png";
+import motoEventHero from "@/assets/moto-event-hero.jpg";
+
+const motoColors = [
+  { name: "Verde", filter: "hue-rotate(90deg) brightness(1.1)" },
+  { name: "Azul", filter: "hue-rotate(200deg) brightness(1.1)" },
+  {
+    name: "Amarilla",
+    filter: "hue-rotate(60deg) brightness(1.2) saturate(1.5)",
+  },
+  { name: "Roja", filter: "none" },
+];
 
 const Index = () => {
   const [guestData, setGuestData] = useState<any[]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [motoIndex, setMotoIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMotoIndex((prev) => (prev + 1) % motoColors.length);
+    }, 1600); // Cambia cada 1.6 segundos
+    return () => clearInterval(interval);
+  }, []);
 
   const handleDataLoad = (data: any[], csvHeaders: string[]) => {
     setGuestData(data);
     setHeaders(csvHeaders);
-    setSearchTerm(''); // Reset search when new data is loaded
+    setSearchTerm(""); // Reset search when new data is loaded
   };
 
   return (
@@ -24,25 +42,32 @@ const Index = () => {
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-lg border-b border-border overflow-hidden">
         <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-4">
           <div className="flex flex-col sm:flex-row items-center justify-between">
-            <div className="flex items-center w-full relative mb-2 sm:mb-0">
-              <div className="w-full h-12 sm:h-16 relative">
-                <img 
-                  src="/moto-animation.svg" 
-                  alt="Moto Event" 
-                  className="absolute top-0 w-full h-full"
-                />
+            <div className="flex flex-col sm:flex-row items-center w-full mb-2 sm:mb-0">
+              {/* Moto Animation Group */}
+              <div className="flex items-center justify-center h-full">
+                <img
+  src="/moto-animation.svg"
+  alt={`Moto ${motoColors[motoIndex].name}`}
+  className="w-full h-full scale-150 object-contain animate-moto-slide"
+  style={{ filter: motoColors[motoIndex].filter }}
+/>
               </div>
-              <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
+              <div className="w-full text-center sm:ml-4">
                 <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   Validación de Invitados
                 </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground">Sistema de gestión para eventos de motos</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">Creado por <a 
-                    className="font-bold bg-gradient-to-t from-blue-400 to-blue-700 bg-clip-text text-transparent" 
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Sistema de gestión para eventos de motos
+                </p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Creado por{" "}
+                  <a
+                    className="font-bold bg-gradient-to-t from-blue-400 to-blue-700 bg-clip-text text-transparent"
                     href="https://npmdesign.netlify.app/"
                   >
                     NPM
-                  </a></p>
+                  </a>
+                </p>
               </div>
             </div>
           </div>
@@ -56,8 +81,12 @@ const Index = () => {
             <Card className="card-moto">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Invitados</p>
-                  <p className="text-2xl font-bold text-primary">{guestData.length}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Total Invitados
+                  </p>
+                  <p className="text-2xl font-bold text-primary">
+                    {guestData.length}
+                  </p>
                 </div>
                 <Users className="h-8 w-8 text-primary" />
               </div>
@@ -65,8 +94,12 @@ const Index = () => {
             <Card className="card-moto">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Campos Detectados</p>
-                  <p className="text-2xl font-bold text-accent">{headers.length}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Campos Detectados
+                  </p>
+                  <p className="text-2xl font-bold text-accent">
+                    {headers.length}
+                  </p>
                 </div>
                 <Database className="h-8 w-8 text-accent" />
               </div>
@@ -75,7 +108,9 @@ const Index = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Modo</p>
-                  <p className="text-lg font-semibold text-success">Tiempo Real</p>
+                  <p className="text-lg font-semibold text-success">
+                    Tiempo Real
+                  </p>
                 </div>
                 <Bike className="h-8 w-8 text-success" />
               </div>
@@ -87,9 +122,9 @@ const Index = () => {
         {!guestData.length && (
           <Card className="card-moto overflow-hidden relative">
             <div className="relative h-64 md:h-80">
-              <img 
-                src={motoEventHero} 
-                alt="Evento de Motos" 
+              <img
+                src={motoEventHero}
+                alt="Evento de Motos"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
@@ -98,7 +133,8 @@ const Index = () => {
                   Bienvenido al Sistema de Validación
                 </h2>
                 <p className="text-muted-foreground">
-                  Carga tu archivo CSV o Excel para comenzar la validación de invitados
+                  Carga tu archivo CSV o Excel para comenzar la validación de
+                  invitados
                 </p>
               </div>
             </div>
@@ -109,7 +145,7 @@ const Index = () => {
         <CSVUploader onDataLoad={handleDataLoad} />
 
         {/* Guest Table Section */}
-        <GuestTable 
+        <GuestTable
           data={guestData}
           headers={headers}
           searchTerm={searchTerm}
@@ -128,7 +164,8 @@ const Index = () => {
                   Preparado para Base de Datos
                 </h3>
                 <p className="text-sm text-muted-foreground mb-3">
-                  El sistema está listo para conectar con Supabase para gestión en tiempo real:
+                  El sistema está listo para conectar con Supabase para gestión
+                  en tiempo real:
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-1">
                   <li>• Sincronización automática de confirmaciones</li>
