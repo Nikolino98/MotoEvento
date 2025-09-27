@@ -32,6 +32,7 @@ export const GuestTable: React.FC<GuestTableProps> = ({
     new Set()
   );
   const [supabaseGuests, setSupabaseGuests] = useState<any[]>([]);
+  const [openRow, setOpenRow] = useState<number | null>(null);
   const { toast } = useToast();
 
   // Load guests from Supabase on component mount
@@ -336,71 +337,161 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                   );
 
                   return (
-                    <TableRow
-                      key={index}
-                      className={
-                        (isConfirmed ? "bg-success/10 " : "") +
-                        " text-white text-xs sm:text-base"
-                      }
-                    >
-                      <TableCell className="sticky left-0 bg-background z-10 text-white">
-                        <Button
-                          onClick={() => handleConfirmGuest(guestId)}
-                          variant={isConfirmed ? "default" : "outline"}
-                          size="sm"
-                          className={`${
-                            isConfirmed ? "bg-success hover:bg-success/90" : ""
-                          } px-2 py-1 h-auto text-xs sm:text-sm`}
-                        >
-                          <CheckCircle2 className="h-3 w-3 mr-1" />
-                          <span className="hidden sm:inline">
-                            {isConfirmed ? "Confirmado" : "Confirmar"}
-                          </span>
-                          <span className="inline sm:hidden">
-                            {isConfirmed ? "OK" : "OK?"}
-                          </span>
-                        </Button>
-                      </TableCell>
-                      <TableCell className="sticky left-[80px] bg-background z-10 text-white">
-                        <Badge
-                          variant={isConfirmed ? "default" : "secondary"}
-                          className={`${
-                            isConfirmed
-                              ? "bg-success/20 text-success border-success/30"
-                              : ""
-                          } text-xs px-1 py-0`}
-                        >
-                          {isConfirmed ? (
-                            <>
-                              <CheckCircle2 className="h-3 w-3 mr-1" />
-                              Confirmado
-                            </>
-                          ) : (
-                            <>
-                              <Clock className="h-3 w-3 mr-1" />
-                              Pendiente
-                            </>
-                          )}
-                        </Badge>
-                      </TableCell>
-                      {orderedHeaders.map((header, colIndex) => (
-                        <TableCell
-                          key={header}
-                          className={`max-w-[200px] truncate text-white px-2 py-2 sm:px-4 sm:py-2 ${
-                            colIndex % 2 === 0
-                              ? "bg-primary/10 text-white"
-                              : "bg-accent/10 text-white"
-                          }`}
-                          style={{
-                            fontSize: "1rem",
-                            whiteSpace: "normal",
-                            wordBreak: "break-word",
-                          }}
-                        >
-                          {row[header]?.toString() || "-"}
+                    <React.Fragment key={index}>
+                      {/* Desktop row */}
+                      <TableRow
+                        className={
+                          "hidden sm:table-row " +
+                          (isConfirmed ? "bg-success/10 " : "") +
+                          " text-white text-xs sm:text-base"
+                        }
+                      >
+                        <TableCell className="sticky left-0 bg-background z-10 text-white">
+                          <Button
+                            onClick={() => handleConfirmGuest(guestId)}
+                            variant={isConfirmed ? "default" : "outline"}
+                            size="sm"
+                            className={`${
+                              isConfirmed
+                                ? "bg-success hover:bg-success/90"
+                                : ""
+                            } px-2 py-1 h-auto text-xs sm:text-sm`}
+                          >
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                            <span className="hidden sm:inline">
+                              {isConfirmed ? "Confirmado" : "Confirmar"}
+                            </span>
+                            <span className="inline sm:hidden">
+                              {isConfirmed ? "OK" : "OK?"}
+                            </span>
+                          </Button>
                         </TableCell>
-                      ))}
-                    </TableRow>
+                        <TableCell className="sticky left-[80px] bg-background z-10 text-white">
+                          <Badge
+                            variant={isConfirmed ? "default" : "secondary"}
+                            className={`${
+                              isConfirmed
+                                ? "bg-success/20 text-success border-success/30"
+                                : ""
+                            } text-xs px-1 py-0`}
+                          >
+                            {isConfirmed ? (
+                              <>
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                Confirmado
+                              </>
+                            ) : (
+                              <>
+                                <Clock className="h-3 w-3 mr-1" />
+                                Pendiente
+                              </>
+                            )}
+                          </Badge>
+                        </TableCell>
+                        {orderedHeaders.map((header, colIndex) => (
+                          <TableCell
+                            key={header}
+                            className={`max-w-[200px] truncate text-white px-2 py-2 sm:px-4 sm:py-2 ${
+                              colIndex % 2 === 0
+                                ? "bg-primary/10 text-white"
+                                : "bg-accent/10 text-white"
+                            }`}
+                            style={{
+                              fontSize: "1rem",
+                              whiteSpace: "normal",
+                              wordBreak: "break-word",
+                            }}
+                          >
+                            {row[header]?.toString() || "-"}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+
+                      {/* Mobile row as accordion */}
+                      <TableRow
+                        className={
+                          "sm:hidden cursor-pointer " +
+                          (isConfirmed ? "bg-success/10 " : "") +
+                          " text-white"
+                        }
+                        onClick={() =>
+                          setOpenRow(openRow === index ? null : index)
+                        }
+                      >
+                        <TableCell
+                          colSpan={2 + orderedHeaders.length}
+                          className="p-0"
+                        >
+                          <div className="flex flex-col">
+                            {/* Header: Nombre o ID */}
+                            <div className="flex items-center justify-between px-3 py-2">
+                              <span className="font-bold text-base">
+                                {row["Nombre"] ||
+                                  row["Apellido y Nombre"] ||
+                                  guestId}
+                              </span>
+                              <span>{openRow === index ? "▲" : "▼"}</span>
+                            </div>
+                            {/* Confirm button and status - SIEMPRE ARRIBA */}
+                            <div className="flex items-center gap-2 mb-2 px-3">
+                              <Button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleConfirmGuest(guestId);
+                                }}
+                                variant={isConfirmed ? "default" : "outline"}
+                                size="sm"
+                                className={`${
+                                  isConfirmed
+                                    ? "bg-success hover:bg-success/90"
+                                    : ""
+                                } px-2 py-1 h-auto text-xs`}
+                              >
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                {isConfirmed ? "Confirmado" : "Confirmar"}
+                              </Button>
+                              <Badge
+                                variant={isConfirmed ? "default" : "secondary"}
+                                className={`${
+                                  isConfirmed
+                                    ? "bg-success/20 text-success border-success/30"
+                                    : ""
+                                } text-xs px-1 py-0`}
+                              >
+                                {isConfirmed ? (
+                                  <>
+                                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                                    Confirmado
+                                  </>
+                                ) : (
+                                  <>
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    Pendiente
+                                  </>
+                                )}
+                              </Badge>
+                            </div>
+                            {/* Accordion content */}
+                            {openRow === index && (
+                              <div className="bg-background/80 px-3 pb-3 rounded-b">
+                                <div className="grid grid-cols-1 gap-1">
+                                  {orderedHeaders.map((header) => (
+                                    <div key={header} className="flex text-xs">
+                                      <span className="font-semibold min-w-[110px]">
+                                        {header}:
+                                      </span>
+                                      <span className="ml-2 break-words">
+                                        {row[header]?.toString() || "-"}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    </React.Fragment>
                   );
                 })}
               </TableBody>
