@@ -272,6 +272,10 @@ export const GuestTable: React.FC<GuestTableProps> = ({
         <Table>
           <TableHeader>
             <TableRow>
+              {/* Orden solo en desktop */}
+              <TableHead className="w-[40px] text-center hidden sm:table-cell">
+                N°
+              </TableHead>
               <TableHead className="w-[120px] text-center">Acciones</TableHead>
               <TableHead className="w-[120px] text-center">Estado</TableHead>
               {getOrderedHeaders(headers).map((header) => (
@@ -301,6 +305,10 @@ export const GuestTable: React.FC<GuestTableProps> = ({
                       " text-white text-xs sm:text-base"
                     }
                   >
+                    {/* Número de orden solo en desktop */}
+                    <TableCell className="text-center font-bold hidden sm:table-cell">
+                      {index + 1}
+                    </TableCell>
                     <TableCell className="sticky left-0 bg-background z-10 text-white">
                       <Button
                         onClick={() => handleConfirmGuest(guestId)}
